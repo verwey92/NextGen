@@ -1,8 +1,13 @@
-import discord
+import discord 
+import os
 from discord.ext import commands, tasks
 import datetime
 
-TOKEN = 'MTE0ODc4NTE2NTY1NzcxODg3NQ.GNFLcl.Mg-5Ty0KgmZATlaaWYn9QczBELnpjiJAJKj6ac'  # Replace this with your bot token
+from dotenv import load_dotenv
+
+load_dotenv()
+
+TOKEN = os.getenv("TOKEN") # Replace this with your bot token
 intents = discord.Intents.default()
 intents.message_content = True
 intents.messages = True
@@ -14,7 +19,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
 
-@bot.command(name='fetch_messages')
+@bot.command(name='channel_messages')
 async def fetch_messages(ctx, channel_name: str):
     await ctx.send(f"Fetching message counts for #{channel_name}... This may take a while.")
     
@@ -31,9 +36,10 @@ async def fetch_messages(ctx, channel_name: str):
         unique_users = set()
         message_count = 0
 
-        async for message in target_channel.history(after=thirty_days_ago):
+        async for message in target_channel.history(after=thirty_days_ago, limit=None):
             message_count += 1
             unique_users.add(message.author.id)
+
 
         output = f"Message and user counts for #{channel_name} in the last 30 days:\n"
         output += f"{message_count} messages from {len(unique_users)} unique users."
