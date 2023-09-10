@@ -46,6 +46,10 @@ async def on_voice_state_update(member, before, after):
             del voice_data[channel_id][user_id]['join_time']
 
 @bot.command()
+async def hello(ctx):
+    await ctx.send("Hello World")
+
+@bot.command()
 async def voice_stats(ctx):
     report = []
 
