@@ -69,6 +69,8 @@ async def voice_stats(ctx):
 
         if total_users == 0:
             average_duration = timedelta(0)
+        if not report:
+            await ctx.send("No voice activity data to report.")
         else:
             average_duration = total_duration // total_users
 

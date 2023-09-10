@@ -1,8 +1,14 @@
 # NextGen
-Discord Bot
-## Command List
-!fetch_messages @username will scan the server and return the number of messages the target user has sent in the server over the last 30 days.
 
+Discord Bot
+
+## Command List
+
+'!usermessages @username' 
+
+'!fetch_messages #channelname' 
+
+'!voice_stats' Will track user join and leave events from voice chats in the server. Command will return total users who entered the voice chats and the average time spent for all users.
 
 ## Re-Deploy Function Docs:
 
