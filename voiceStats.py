@@ -3,15 +3,15 @@ import os
 from discord.ext import commands
 from datetime import datetime, timedelta
 
-intents = discord.Intents.default()
-intents.message_content = True
-intents.voice_states = True
-
 from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv("TOKEN") # Replace this with your bot token
+TOKEN = os.getenv("TOKEN")  # Replace this with your bot token
+
+intents = discord.Intents.default()
+intents.message_content = True
+intents.voice_states = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -22,6 +22,7 @@ voice_data = {}  # Structure: {channel_id: {user_id: { 'join_time': datetime, 't
 async def on_voice_state_update(member, before, after):
     user_id = member.id
     now = datetime.now()
+    
 
     # User joined a voice channel
     if before.channel is None and after.channel is not None:
@@ -36,18 +37,13 @@ async def on_voice_state_update(member, before, after):
     # User left a voice channel
     elif before.channel is not None and after.channel is None:
         channel_id = before.channel.id
-        if channel_id not in voice_data or user_id not in voice_data[channel_id]:
-            # Channel or user data is not available, skip further processing for this event
-            return
-        if 'join_time' in voice_data[channel_id][user_id]:
+        if user_id in voice_data[channel_id] and 'join_time' in voice_data[channel_id][user_id]:
             join_time = voice_data[channel_id][user_id]['join_time']
             duration = now - join_time
             voice_data[channel_id][user_id]['total_time'] += duration
             del voice_data[channel_id][user_id]['join_time']
-
-@bot.command()
-async def hello(ctx):
-    await ctx.send("Hello World")
+    
+    print(voice_data)
 
 @bot.command()
 async def voice_stats(ctx):
@@ -69,8 +65,6 @@ async def voice_stats(ctx):
 
         if total_users == 0:
             average_duration = timedelta(0)
-        if not report:
-            await ctx.send("No voice activity data to report.")
         else:
             average_duration = total_duration // total_users
 
@@ -79,6 +73,9 @@ async def voice_stats(ctx):
         channel_name = bot.get_channel(channel_id).name
         report.append(f"Channel {channel_name} - Total users: {total_users}, Average duration: {hh:02}:{mm:02}:{ss:02}")
 
-    await ctx.send("\n".join(report))
+    if not report:
+        await ctx.send("No voice activity recorded yet!")
+    else:
+        await ctx.send("\n".join(report))
 
 bot.run(TOKEN)
