@@ -28,11 +28,13 @@ async def on_voice_state_update(member, before, after):
     if before.channel is None and after.channel is not None:
         channel_id = after.channel.id
         if channel_id not in voice_data:
+            print(f"channel id is not in vioice data: {channel_id}")
             voice_data[channel_id] = {}
         if user_id not in voice_data[channel_id]:
             voice_data[channel_id][user_id] = {'join_time': now, 'total_time': timedelta(0)}
-        else:
-            voice_data[channel_id][user_id]['join_time'] = now
+            print(f"user joined channel {channel_id} @ {now} for total time of {timedelta(0)}")
+        #else:
+            #voice_data[channel_id][user_id]['join_time'] 
 
     # User left a voice channel
     elif before.channel is not None and after.channel is None:
@@ -43,7 +45,7 @@ async def on_voice_state_update(member, before, after):
             voice_data[channel_id][user_id]['total_time'] += duration
             del voice_data[channel_id][user_id]['join_time']
     
-    print(voice_data)
+    ##print(voice_data)
 
 @bot.command()
 async def voice_stats(ctx):
