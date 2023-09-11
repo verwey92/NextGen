@@ -1,46 +1,41 @@
-import discord
-import os
-from discord.ext import commands
 from datetime import datetime, timedelta
 
-from dotenv import load_dotenv
+import discord
+from discord.ext import commands
 
-load_dotenv()
 
-TOKEN = os.getenv("TOKEN") # Replace this with your bot token
-intents = discord.Intents.default()
-intents.message_content = True
-intents.messages = True
+class UserPull(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+        self._last_member = None
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+    @commands.command()
+    async def user_messages(self, ctx, member: discord.Member = None):
+        if member is None:
+            await ctx.send("Please specify a user!")
+            return
 
-@bot.event
-async def on_ready():
-    print(f'{bot.user.name} has connected to Discord!')
+        # Inform the user that the command is processing
+        await ctx.send(
+            "Retreiving user message count within the server for the last 30 days."
+        )
 
-@bot.command()
-async def usermessages(ctx, member: discord.Member = None):
-    if member is None:
-        await ctx.send("Please specify a user!")
-        return
-    
-    #Inform the user that the command is processing
-    await ctx.send("Retreiving user message count within the server for the last 30 days.")
+        end_time = datetime.utcnow()
+        start_time = end_time - timedelta(days=30)
+        counter = 0
 
-    end_time = datetime.utcnow()
-    start_time = end_time - timedelta(days=30)
-    counter = 0
+        # Iterate over the channels to count messages
+        for channel in ctx.guild.text_channels:
+            try:
+                # Filter messages by the user and the date range
+                async for message in channel.history(
+                    limit=None, after=start_time, before=end_time
+                ):
+                    if message.author == member:
+                        counter += 1
+            except discord.Forbidden:
+                continue  # Ignore channels the bot doesn't have access to
 
-    # Iterate over the channels to count messages
-    for channel in ctx.guild.text_channels:
-        try:
-            # Filter messages by the user and the date range
-            async for message in channel.history(limit=None, after=start_time, before=end_time):
-                if message.author == member:
-                    counter += 1
-        except discord.Forbidden:
-            continue  # Ignore channels the bot doesn't have access to
-
-    await ctx.send(f"{member.mention} has sent {counter} messages in the last 30 days!")
-
-bot.run(TOKEN)
+        await ctx.send(
+            f"{member.mention} has sent {counter} messages in the last 30 days!"
+        )

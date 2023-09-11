@@ -5,4 +5,4 @@ COPY . /app
 RUN pip install discord.py
 RUN pip install python-dotenv
 
-CMD ["python", "voiceStats.py"]
+CMD ["python", "bot.py"]
